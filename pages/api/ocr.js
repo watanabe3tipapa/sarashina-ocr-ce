@@ -1,8 +1,7 @@
 import formidable from "formidable";
 import fs from "fs";
-import fetch from "node-fetch";
 
-export const config = { api: { bodyParser: false } };
+export const config = { api: { bodyParser: false, responseLimit: "10mb" } };
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
@@ -13,26 +12,42 @@ export default async function handler(req, res) {
     const file = files?.file;
     if (!file) return res.status(400).json({ error: "no file" });
 
+    const token = process.env.HF_API_TOKEN;
+    if (!token) return res.status(500).json({ error: "HF_API_TOKEN not configured" });
+
     try {
       const data = fs.readFileSync(file.filepath);
-      const hfRes = await fetch("https://api-inference.huggingface.co/models/sbintuitions/sarashina2.2-ocr", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.HF_API_TOKEN}`,
-          "Content-Type": "application/octet-stream"
-        },
-        body: data
-      });
+      const hfRes = await fetch(
+        "https://api-inference.huggingface.co/models/sbintuitions/sarashina2.2-ocr",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/octet-stream"
+          },
+          body: data
+        }
+      );
 
+      const text = await hfRes.text();
       if (!hfRes.ok) {
-        const text = await hfRes.text();
         return res.status(502).json({ error: "hf_error", detail: text });
       }
 
-      const json = await hfRes.json();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        return res.status(200).json({ result: text });
+      }
+
       return res.status(200).json({ result: json });
     } catch (e) {
       return res.status(500).json({ error: e.message });
+    } finally {
+      if (file?.filepath && fs.existsSync(file.filepath)) {
+        fs.unlinkSync(file.filepath);
+      }
     }
   });
 }
