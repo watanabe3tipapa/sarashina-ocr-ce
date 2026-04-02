@@ -1,6 +1,6 @@
 # Sarashina OCR
 
-Hugging Face の `sbintuitions/sarashina2.2-ocr` モデルを使った日本語 OCR の Next.js アプリケーションです。
+Hugging Face の `sbintuitions/sarashina2.2-ocr` モデル用于日本語 OCR の Next.js アプリケーションです。
 
 ## 環境準備
 
