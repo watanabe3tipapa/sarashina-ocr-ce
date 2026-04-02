@@ -388,7 +388,7 @@ export default function Home() {
       <div className="main-container">
         <div className="header">
           <h1>Sarashina OCR</h1>
-          <p>Hugging Face 日本語OCR | <span className="model-badge">sarashina2.2-ocr</span></p>
+          <p>Hugging Face 日本語OCR | <span className="model-badge">trocr-base-handwritten</span></p>
         </div>
 
         <div className="card">

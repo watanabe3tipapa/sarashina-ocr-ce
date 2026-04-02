@@ -39,7 +39,7 @@ export default async function handler(req, res) {
       const hf = new HfInference(token);
       
       const result = await hf.imageToText({
-        model: "sbintuitions/sarashina2.2-ocr",
+        model: "microsoft/trocr-base-handwritten",
         inputs: fs.createReadStream(file.filepath),
       });
 
