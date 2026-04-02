@@ -61,6 +61,36 @@ export default function Home() {
     } catch (e) {
       console.error("Upload error:", e);
       showToast("エラー: " + (e.message || "ネットワークエラー"), "error");
+    }
+  };
+
+  const debugUpload = async () => {
+    if (!file) { showToast("ファイルを選択してください", "warning"); return; }
+    setLoading(true); setText("");
+    const fd = new FormData();
+    fd.append("file", file);
+
+    try {
+      const res = await fetch("/api/ocr", { method: "POST", body: fd });
+      const j = await res.json();
+      console.log("Response:", res.status, j);
+      if (!res.ok) {
+        setText("エラー詳細: " + JSON.stringify(j, null, 2));
+        showToast("エラー: " + (j.error || res.status), "error");
+      } else {
+        console.log("HF result:", j.result);
+        if (Array.isArray(j.result) && j.result.length > 0) {
+          setText(j.result[0].generated_text || j.result[0].text || JSON.stringify(j.result[0], null, 2));
+        } else if (typeof j.result === "object") {
+          setText(j.result.generated_text || j.result.text || JSON.stringify(j.result, null, 2));
+        } else {
+          setText(String(j.result));
+        }
+      }
+    } catch (e) {
+      console.error("Upload error:", e);
+      setText("エラー: " + e.message);
+      showToast("エラー: " + (e.message || "ネットワークエラー"), "error");
     } finally {
       setLoading(false);
     }
@@ -409,7 +439,7 @@ export default function Home() {
 
                   <button
                     className="btn-primary-custom"
-                    onClick={upload}
+                    onClick={debugUpload}
                     disabled={loading || !file}
                   >
                     {loading ? <><span className="spinner"></span>処理中...</> : "画像を送信してOCR実行"}
