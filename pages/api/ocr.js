@@ -1,5 +1,6 @@
 import formidable from "formidable";
 import fs from "fs";
+import { HfInference } from "@huggingface/inference";
 
 export const config = {
   api: {
@@ -35,36 +36,16 @@ export default async function handler(req, res) {
     }
 
     try {
-      const data = fs.readFileSync(file.filepath);
+      const hf = new HfInference(token);
       
-      const hfRes = await fetch(
-        "https://api-inference.huggingface.co/models/sbintuitions/sarashina2.2-ocr",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/octet-stream",
-          },
-          body: data,
-        }
-      );
+      const result = await hf.imageToText({
+        model: "sbintuitions/sarashina2.2-ocr",
+        inputs: fs.createReadStream(file.filepath),
+      });
 
-      const text = await hfRes.text();
-
-      if (!hfRes.ok) {
-        return res.status(502).json({ error: "HF API error", detail: text });
-      }
-
-      let json;
-      try {
-        json = JSON.parse(text);
-      } catch {
-        return res.status(200).json({ result: text });
-      }
-
-      return res.status(200).json({ result: json });
+      return res.status(200).json({ result });
     } catch (e) {
-      console.error("Request error:", e);
+      console.error("HF API error:", e);
       return res.status(500).json({ error: e.message });
     } finally {
       if (file?.filepath) {

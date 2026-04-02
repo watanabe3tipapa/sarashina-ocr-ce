@@ -79,12 +79,12 @@ export default function Home() {
         showToast("エラー: " + (j.error || res.status), "error");
       } else {
         console.log("HF result:", j.result);
-        if (Array.isArray(j.result) && j.result.length > 0) {
-          setText(j.result[0].generated_text || j.result[0].text || JSON.stringify(j.result[0], null, 2));
-        } else if (typeof j.result === "object") {
-          setText(j.result.generated_text || j.result.text || JSON.stringify(j.result, null, 2));
+        if (j.result?.generated_text) {
+          setText(j.result.generated_text);
+        } else if (typeof j.result === "string") {
+          setText(j.result);
         } else {
-          setText(String(j.result));
+          setText(JSON.stringify(j.result, null, 2));
         }
       }
     } catch (e) {
