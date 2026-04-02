@@ -58,8 +58,9 @@ export default function Home() {
           setText(String(j.result));
         }
       }
-    } catch {
-      showToast("ネットワークエラー", "error");
+    } catch (e) {
+      console.error("Upload error:", e);
+      showToast("エラー: " + (e.message || "ネットワークエラー"), "error");
     } finally {
       setLoading(false);
     }
