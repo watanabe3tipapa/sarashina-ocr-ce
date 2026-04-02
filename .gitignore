@@ -3,3 +3,7 @@ node_modules/
 .env
 *.log
 .Rhistory
+__pycache__/
+*.pyc
+venv/
+.venv/

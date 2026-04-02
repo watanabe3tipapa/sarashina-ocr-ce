@@ -78,9 +78,9 @@ export default function Home() {
         setText("エラー詳細: " + JSON.stringify(j, null, 2));
         showToast("エラー: " + (j.error || res.status), "error");
       } else {
-        console.log("HF result:", j.result);
-        if (j.result?.generated_text) {
-          setText(j.result.generated_text);
+        console.log("Result:", j.result);
+        if (j.result?.text) {
+          setText(j.result.text);
         } else if (typeof j.result === "string") {
           setText(j.result);
         } else {
@@ -388,7 +388,7 @@ export default function Home() {
       <div className="main-container">
         <div className="header">
           <h1>Sarashina OCR</h1>
-          <p>Hugging Face 日本語OCR | <span className="model-badge">trocr-base-handwritten</span></p>
+          <p>日本語OCR（ローカル推論）| <span className="model-badge">sarashina2.2-ocr</span></p>
         </div>
 
         <div className="card">

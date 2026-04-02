@@ -1,6 +1,5 @@
 import formidable from "formidable";
 import fs from "fs";
-import { HfInference } from "@huggingface/inference";
 
 export const config = {
   api: {
@@ -12,11 +11,6 @@ export const config = {
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const token = process.env.HF_API_TOKEN;
-  if (!token) {
-    return res.status(500).json({ error: "HF_API_TOKEN not configured" });
   }
 
   const form = formidable({
@@ -36,16 +30,26 @@ export default async function handler(req, res) {
     }
 
     try {
-      const hf = new HfInference(token);
+      const formData = new FormData();
+      const stream = fs.createReadStream(file.filepath);
+      const buffer = await streamToBuffer(stream);
       
-      const result = await hf.imageToText({
-        model: "microsoft/trocr-base-handwritten",
-        inputs: fs.createReadStream(file.filepath),
+      formData.append("image", new Blob([buffer]));
+
+      const localRes = await fetch("http://localhost:8000/ocr", {
+        method: "POST",
+        body: formData,
       });
 
+      if (!localRes.ok) {
+        const errorText = await localRes.text();
+        return res.status(502).json({ error: "Local OCR error", detail: errorText });
+      }
+
+      const result = await localRes.json();
       return res.status(200).json({ result });
     } catch (e) {
-      console.error("HF API error:", e);
+      console.error("OCR error:", e);
       return res.status(500).json({ error: e.message });
     } finally {
       if (file?.filepath) {
@@ -54,5 +58,14 @@ export default async function handler(req, res) {
         } catch {}
       }
     }
+  });
+}
+
+function streamToBuffer(stream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on("data", chunk => chunks.push(chunk));
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+    stream.on("error", reject);
   });
 }
