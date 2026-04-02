@@ -1,14 +1,25 @@
-# Sarashina OCR
-
-Hugging Face の `sbintuitions/sarashina2.2-ocr` モデル用于日本語 OCR の Next.js アプリケーションです。
+# Sarashina OCR - Usage
 
 ## 環境準備
 
 ```bash
 npm install
+cd backend
+pip install -r requirements.txt
 ```
 
-## 開発環境での起動
+## 起動方法
+
+### 1. Pythonサーバー（バックエンド）
+
+```bash
+cd backend
+python main.py
+```
+
+初回起動時にモデルがダウンロードされます。数GBの容量と数分かかる場合があります。
+
+### 2. Next.js開発サーバー
 
 ```bash
 npm run dev
@@ -16,32 +27,15 @@ npm run dev
 
 ブラウザで http://localhost:3000 にアクセスしてください。
 
-## Vercel へのデプロイ
-
-1. このリポジトリを GitHub にプッシュ
-2. Vercel でプロジェクトをインポート
-3. Environment Variables に以下を設定:
-   - `HF_API_TOKEN`: Hugging Face の API トークン
-4. Deploy
-
 ## 使用方法
 
-1. 画像ファイルを選択（JPEG/PNG）
-2. 「Upload & OCR」ボタンをクリック
+1. 画像ファイルを選択（JPEG/PNG対応）
+2. 「画像を送信してOCR実行」ボタンをクリック
 3. 抽出されたテキストが画面に表示される
-4. 「Copy」でクリップボードにコピー、「Download」でテキストファイルをダウンロード
+4. 「コピー」でクリップボードにコピー、「ダウンロード」でテキストファイルをダウンロード
 
-## 環境変数
+## GPUについて
 
-| 変数名 | 説明 |
-|--------|------|
-| `HF_API_TOKEN` | Hugging Face API トークン（必須） |
+GPUがある場合は自動的にGPUを使用して高速に処理します。CPU onlyの環境でも動作しますが、处理時間が長くなります。
 
-`.env.example` を `.env.local` にコピーして開発環境で利用してください。
-
-## 技術スタック
-
-- Next.js 14
-- React 18
-- Bootstrap 5
-- Hugging Face Inference API
+推奨VRAM: 4GB以上
